@@ -1,0 +1,6 @@
+[deps]
+Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+NFLData = "38e18452-fdda-4cae-b91e-088906595f57"
+NFLTiebreaking = "9e8a92f7-e673-4d92-ac92-678ee4e93ab7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
