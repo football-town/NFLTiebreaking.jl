@@ -9,8 +9,10 @@ projects = ["test"]
 [deps]
 Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [compat]
 Chain = "1.0.0"
 DataFrames = "1.8.1"
+Logging = "1.11.0"
 julia = "1.12"

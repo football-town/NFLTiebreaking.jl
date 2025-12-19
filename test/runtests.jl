@@ -18,6 +18,10 @@ const AFC_RANKS = Dict(
     2004 => ["PIT", "NE", "IND", "LAC", "NYJ", "DEN", "JAX", "BAL", "BUF", "CIN", "HOU", "KC", "LV", "TEN", "MIA", "CLE"],
     2005 => ["IND", "DEN", "CIN", "NE", "JAX", "PIT", "KC", "MIA", "LAC", "BAL", "CLE", "BUF", "NYJ", "LV", "TEN", "HOU"],
 
+    2020 => ["KC", "BUF", "PIT", "TEN", "BAL", "CLE", "IND", "MIA", "LV", "NE", "LAC", "DEN", "CIN", "HOU", "NYJ", "JAX"],
+    2021 => ["TEN", "KC", "BUF", "CIN", "LV", "NE", "PIT", "IND", "MIA", "LAC", "CLE", "BAL", "DEN", "NYJ", "HOU", "JAX"],
+    2022 => ["KC", "BUF", "CIN", "JAX", "LAC", "BAL", "MIA", "PIT", "NE", "NYJ", "TEN", "CLE", "LV", "DEN", "IND", "HOU"],
+    2023 => ["BAL", "BUF", "KC", "HOU", "CLE", "MIA", "PIT", "CIN", "JAX", "IND", "LV", "DEN", "NYJ", "TEN", "LAC", "NE"],
     2024 => ["KC", "BUF", "BAL", "HOU", "LAC", "PIT", "DEN", "CIN", "IND", "MIA", "NYJ", "JAX", "NE", "LV", "CLE", "TEN"],
 )
 
@@ -30,10 +34,14 @@ const NFC_RANKS = Dict(
     2004 => ["PHI", "ATL", "GB", "SEA", "LA", "MIN", "NO", "CAR", "DET", "ARI", "NYG", "DAL", "WAS", "TB", "CHI", "SF"],
     2005 => ["SEA", "CHI", "TB", "NYG", "CAR", "WAS", "MIN", "DAL", "ATL", "PHI", "LA", "DET", "ARI", "GB", "SF", "NO"],
 
+    2020 => ["GB", "NO", "SEA", "WAS", "TB", "LA", "CHI", "ARI", "MIN", "SF", "NYG", "DAL", "CAR", "DET", "PHI", "ATL"],
+    2021 => ["GB", "TB", "DAL", "LA", "ARI", "SF", "PHI", "NO", "MIN", "WAS", "SEA", "ATL", "CHI", "CAR", "NYG", "DET"],
+    2022 => ["PHI", "SF", "MIN", "TB", "DAL", "NYG", "SEA", "DET", "WAS", "GB", "CAR", "NO", "ATL", "LA", "ARI", "CHI"],
+    2023 => ["SF", "DAL", "DET", "TB", "PHI", "LA", "GB", "SEA", "NO", "MIN", "CHI", "ATL", "NYG", "WAS", "ARI", "CAR"],
     2024 => ["DET", "PHI", "TB", "LA", "MIN", "WAS", "GB", "SEA", "ATL", "ARI", "DAL", "SF", "CHI", "CAR", "NO", "NYG"],
 )
 
-for year in 2024:2024
+for year in 2020:2024
     @testset "$year End-of-Season Ranking" begin
         season_df = @chain load_schedules() begin
             subset(

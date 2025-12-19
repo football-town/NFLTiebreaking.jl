@@ -4,6 +4,7 @@ module NFLTiebreaking
 
 using Chain
 using DataFrames
+using Logging
 
 """
     winning_percentage(wins, losses, ties)
@@ -633,6 +634,7 @@ function wild_card(teams::AbstractString...; df::DataFrame)
         throw(CoinTossNeededError())  # non-deterministic
     else
         # 3 or more...
+        @debug "3+ teams tied for the Wild Card: $teams"
 
         # 1. Apply the division tiebreaker to eliminate all but the 
         # highest-ranking club in each division.
@@ -655,44 +657,110 @@ function wild_card(teams::AbstractString...; df::DataFrame)
         end
 
         tb = h2h_sweep(teams...; df)
-        if !allequal(tb)
+        @debug "h2h" tb
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = conference(teams...; df)
-        if !allequal(tb)
+        @debug "conference" tb
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = common(teams...; df)  # TODO: minimum of 4
-        if !allequal(tb)
+        @debug "common" tb
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = victory(teams...; df)
-        if !allequal(tb)
+        @debug "victory" tb
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = schedule(teams...; df)
-        if !allequal(tb)
+        @debug "schedule" tb
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = conf_points_rank(teams...; df)
-        if !allequal(tb)
+        @debug "conference points rank" tb
+        if allunique(tb)
             return rank(tb)
+        elseif !allequal(tb)
+            mask = (tb .== minimum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= within_division(teams[mask]...; df)
+            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = all_points_rank(teams...; df)
-        if !allequal(tb)
+        if allunique(tb)
             return rank(tb)
+        elseif !allequal(tb)
+            mask = (tb .== minimum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= within_division(teams[mask]...; df)
+            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = net_points_conference(teams...; df)
-        if !allequal(tb)
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = net_points_all(teams...; df)
-        if !allequal(tb)
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         tb = net_tds(teams...; df)
-        if !allequal(tb)
+        if allunique(tb)
             return rank(tb, rev=true)
+        elseif !allequal(tb)
+            mask = (tb .== maximum(tb))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= wild_card(teams[mask]...; df)
+            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
+            return ranks
         end
         throw(CoinTossNeededError())  # non-deterministic
     end
