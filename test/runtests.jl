@@ -18,7 +18,10 @@ const AFC_RANKS = Dict(
     2004 => ["PIT", "NE", "IND", "LAC", "NYJ", "DEN", "JAX", "BAL", "BUF", "CIN", "HOU", "KC", "LV", "TEN", "MIA", "CLE"],
     2005 => ["IND", "DEN", "CIN", "NE", "JAX", "PIT", "KC", "MIA", "LAC", "BAL", "CLE", "BUF", "NYJ", "LV", "TEN", "HOU"],
 
-    2020 => ["KC", "BUF", "PIT", "TEN", "BAL", "CLE", "IND", "MIA", "LV", "NE", "LAC", "DEN", "CIN", "HOU", "NYJ", "JAX"],
+    2017 => ["NE", "PIT", "JAX", "KC", "TEN", "BUF", "BAL", "LAC", "CIN", "OAK", "MIA", "DEN", "NYJ", "IND", "HOU", "CLE"],
+    2018 => ["KC", "NE", "HOU", "BAL", "LAC", "IND", "PIT", "TEN", "CLE", "MIA", "DEN", "CIN", "BUF", "JAX", "NYJ", "OAK"],
+    2019 => ["BAL", "KC", "NE", "HOU", "BUF", "TEN", "PIT", "DEN", "OAK", "IND", "NYJ", "JAX", "CLE", "LAC", "MIA", "CIN"],
+    2020 => ["KC", "BUF", "PIT", "TEN", "BAL", "CLE", "IND", "MIA", "LV", "NE", "LAC", "DEN", "CIN", "HOU", "NYJ", "JAX"],  # OAK -> LV
     2021 => ["TEN", "KC", "BUF", "CIN", "LV", "NE", "PIT", "IND", "MIA", "LAC", "CLE", "BAL", "DEN", "NYJ", "HOU", "JAX"],
     2022 => ["KC", "BUF", "CIN", "JAX", "LAC", "BAL", "MIA", "PIT", "NE", "NYJ", "TEN", "CLE", "LV", "DEN", "IND", "HOU"],
     2023 => ["BAL", "BUF", "KC", "HOU", "CLE", "MIA", "PIT", "CIN", "JAX", "IND", "LV", "DEN", "NYJ", "TEN", "LAC", "NE"],
@@ -34,6 +37,9 @@ const NFC_RANKS = Dict(
     2004 => ["PHI", "ATL", "GB", "SEA", "LA", "MIN", "NO", "CAR", "DET", "ARI", "NYG", "DAL", "WAS", "TB", "CHI", "SF"],
     2005 => ["SEA", "CHI", "TB", "NYG", "CAR", "WAS", "MIN", "DAL", "ATL", "PHI", "LA", "DET", "ARI", "GB", "SF", "NO"],
 
+    2017 => ["PHI", "MIN", "LA", "NO", "CAR", "ATL", "DET", "SEA", "DAL", "ARI", "GB", "WAS", "SF", "TB", "CHI", "NYG"],
+    2018 => ["NO", "LA", "CHI", "DAL", "SEA", "PHI", "MIN", "ATL", "WAS", "CAR", "GB", "DET", "NYG", "TB", "SF", "ARI"],
+    2019 => ["SF", "GB", "NO", "PHI", "SEA", "MIN", "LA", "CHI", "DAL", "ATL", "TB", "ARI", "CAR", "NYG", "DET", "WAS"],
     2020 => ["GB", "NO", "SEA", "WAS", "TB", "LA", "CHI", "ARI", "MIN", "SF", "NYG", "DAL", "CAR", "DET", "PHI", "ATL"],
     2021 => ["GB", "TB", "DAL", "LA", "ARI", "SF", "PHI", "NO", "MIN", "WAS", "SEA", "ATL", "CHI", "CAR", "NYG", "DET"],
     2022 => ["PHI", "SF", "MIN", "TB", "DAL", "NYG", "SEA", "DET", "WAS", "GB", "CAR", "NO", "ATL", "LA", "ARI", "CHI"],
@@ -41,15 +47,17 @@ const NFC_RANKS = Dict(
     2024 => ["DET", "PHI", "TB", "LA", "MIN", "WAS", "GB", "SEA", "ATL", "ARI", "DAL", "SF", "CHI", "CAR", "NO", "NYG"],
 )
 
-for year in 2020:2024
+schedule_df = load_schedules()
+team_df = load_teams()
+
+for year in 2017:2024
     @testset "$year End-of-Season Ranking" begin
-        season_df = @chain load_schedules() begin
+        season_df = @chain schedule_df begin
             subset(
                 :season => x -> x .== year,
                 :game_type => x -> x .== "REG",
             )
         end
-        team_df = load_teams()
         df = clean_data(season_df, team_df)
         rank_df = compute_ranks(df)
 
