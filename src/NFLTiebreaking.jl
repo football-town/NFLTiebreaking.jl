@@ -79,7 +79,7 @@ end
 """
 3. Common
 """
-function common(teams::AbstractString...; df)
+function common(teams::AbstractString...; df::AbstractDataFrame, min_games::Integer = 0)
     common_opponents = reduce(intersect, [
         Set(df[df[!, :team] .== t, :opponent])
         for t
@@ -98,11 +98,15 @@ function common(teams::AbstractString...; df)
                 :is_tie => sum => :ties,
             )
         end
-        rtn[i] = winning_percentage(
-            team_df[1, :wins],
-            team_df[1, :losses],
-            team_df[1, :ties],
-        )
+        if (team_df[1, :wins] + team_df[1, :losses] + team_df[1, :ties]) >= min_games
+            # TODO: verify if this is right
+            # This appears to apply in 2010.
+            rtn[i] = winning_percentage(
+                team_df[1, :wins],
+                team_df[1, :losses],
+                team_df[1, :ties],
+            )
+        end
     end
     return rtn
 end
@@ -599,7 +603,7 @@ function wild_card(teams::AbstractString...; df::DataFrame)
         if !allequal(tb)
             return rank(tb, rev=true)
         end
-        tb = common(teams...; df)  # TODO: minimum of 4
+        tb = common(teams...; df, min_games=4)
         if !allequal(tb)
             return rank(tb, rev=true)
         end
@@ -678,7 +682,7 @@ function wild_card(teams::AbstractString...; df::DataFrame)
             ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
             return ranks
         end
-        tb = common(teams...; df)  # TODO: minimum of 4
+        tb = common(teams...; df, min_games=4)
         @debug "common" tb
         if allunique(tb)
             return rank(tb, rev=true)
