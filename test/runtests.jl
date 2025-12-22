@@ -42,7 +42,7 @@ const NFC_RANKS = Dict(
     1999 => ["STL", "TB", "WAS", "MIN", "DAL", "DET", "CAR", "GB", "NYG", "ARI", "CHI", "ATL", "PHI", "SF", "NO"],
     2000 => ["NYG", "MIN", "NO", "PHI", "TB", "STL", "GB", "DET", "WAS", "CAR", "SF", "DAL", "CHI", "ATL", "ARI"],
     2001 => ["STL", "CHI", "PHI", "GB", "SF", "TB", "WAS", "NYG", "NO", "ATL", "ARI", "DAL", "MIN", "DET", "CAR"],
-    2002 => ["PHI", "TB", "GB", "SF", "NYG", "ATL", "NO", "STL", "SEA", "WAS", "CAR", "MIN", "ARI", "DAL", "CHI", "DET"],
+    2002 => ["PHI", "TB", "GB", "SF", "NYG", "ATL", "NO", "STL", "SEA", "WAS", "CAR", "MIN", "ARI", "DAL", "CHI", "DET"],  # SEA rejoins NFC
     2003 => ["PHI", "STL", "CAR", "GB", "SEA", "DAL", "MIN", "NO", "SF", "TB", "CHI", "ATL", "DET", "WAS", "NYG", "ARI"],
     2004 => ["PHI", "ATL", "GB", "SEA", "STL", "MIN", "NO", "CAR", "DET", "ARI", "NYG", "DAL", "WAS", "TB", "CHI", "SF"],
     2005 => ["SEA", "CHI", "TB", "NYG", "CAR", "WAS", "MIN", "DAL", "ATL", "PHI", "STL", "DET", "ARI", "GB", "SF", "NO"],
@@ -70,7 +70,10 @@ const NFC_RANKS = Dict(
 schedule_df = load_schedules()
 team_df = load_teams()
 
-for year in 2011:2024
+for year in 2002:2024
+    if year == 2006
+        continue
+    end
     @testset "$year End-of-Season Ranking" begin
         season_df = @chain schedule_df begin
             subset(

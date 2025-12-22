@@ -342,6 +342,21 @@ end
 
 struct CoinTossNeededError <: Exception end
 
+macro iftiebroken(tb, teams, df, func, rev)
+    op = rev ? maximum : minimum
+    return quote
+        if !allequal( $(esc(tb)) )
+            mask = ( $(esc(tb)) .== $op( $(esc(tb)) ))
+            ranks = zeros(Int, size(mask))
+            ranks[mask] .= ($(esc(func)))( $(esc(teams))[mask]...; $(esc(df)) )
+            mask = (ranks .!= 1)  # only one club advances during any tie-breaking step
+            ranks[mask] .= ($(esc(func)))( $(esc(teams))[mask]...; $(esc(df))) .+ 1
+            return ranks
+        end
+    end
+end
+
+
 """
 Division Procedure
 """
@@ -350,162 +365,52 @@ function within_division(teams::AbstractString...; df::DataFrame)
         return [1,]
     elseif length(teams) == 2
         tb = h2h(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = division(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = common(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = conference(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = victory(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = schedule(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = conf_points_rank(teams...; df)
-        if !allequal(tb)
-            return rank(tb)
-        end
+        @iftiebroken tb teams df within_division false
         tb = all_points_rank(teams...; df)
-        if !allequal(tb)
-            return rank(tb)
-        end
+        @iftiebroken tb teams df within_division false
         tb = net_points_common(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = net_points_all(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         tb = net_tds(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df within_division true
         throw(CoinTossNeededError())  # non-deterministic
     else
         # 3 or more...
         tb = h2h(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = division(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = common(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = conference(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = victory(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = schedule(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = conf_points_rank(teams...; df)
-        if allunique(tb)
-            return rank(tb)
-        elseif !allequal(tb)
-            mask = (tb .== minimum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division false
         tb = all_points_rank(teams...; df)
-        if allunique(tb)
-            return rank(tb)
-        elseif !allequal(tb)
-            mask = (tb .== minimum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division false
         tb = net_points_common(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = net_points_all(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         tb = net_tds(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df within_division true
         throw(CoinTossNeededError())  # non-deterministic
     end
 end
@@ -596,45 +501,25 @@ function wild_card(teams::AbstractString...; df::DataFrame)
             return within_division(teams...; df)
         end
         tb = h2h(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = conference(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = common(teams...; df, min_games=4)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = victory(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = schedule(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = conf_points_rank(teams...; df)
-        if !allequal(tb)
-            return rank(tb)
-        end
+        @iftiebroken tb teams df wild_card false
         tb = all_points_rank(teams...; df)
-        if !allequal(tb)
-            return rank(tb)
-        end
+        @iftiebroken tb teams df wild_card false
         tb = net_points_conference(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = net_points_all(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         tb = net_tds(teams...; df)
-        if !allequal(tb)
-            return rank(tb, rev=true)
-        end
+        @iftiebroken tb teams df wild_card true
         throw(CoinTossNeededError())  # non-deterministic
     else
         # 3 or more...
@@ -662,110 +547,30 @@ function wild_card(teams::AbstractString...; df::DataFrame)
 
         tb = h2h_sweep(teams...; df)
         @debug "h2h" tb
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = conference(teams...; df)
         @debug "conference" tb
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = common(teams...; df, min_games=4)
         @debug "common" tb
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = victory(teams...; df)
         @debug "victory" tb
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = schedule(teams...; df)
         @debug "schedule" tb
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = conf_points_rank(teams...; df)
         @debug "conference points rank" tb
-        if allunique(tb)
-            return rank(tb)
-        elseif !allequal(tb)
-            mask = (tb .== minimum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card false
         tb = all_points_rank(teams...; df)
-        if allunique(tb)
-            return rank(tb)
-        elseif !allequal(tb)
-            mask = (tb .== minimum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= within_division(teams[mask]...; df)
-            ranks[.!mask] .= (within_division(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card false
         tb = net_points_conference(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = net_points_all(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         tb = net_tds(teams...; df)
-        if allunique(tb)
-            return rank(tb, rev=true)
-        elseif !allequal(tb)
-            mask = (tb .== maximum(tb))
-            ranks = zeros(Int, size(mask))
-            ranks[mask] .= wild_card(teams[mask]...; df)
-            ranks[.!mask] .= (wild_card(teams[.!mask]...; df) .+ sum(mask))
-            return ranks
-        end
+        @iftiebroken tb teams df wild_card true
         throw(CoinTossNeededError())  # non-deterministic
     end
 end
