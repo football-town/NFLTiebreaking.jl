@@ -72,7 +72,7 @@ team_df = load_teams()
 
 for year in 2002:2024
     if year == 2006
-        continue
+        continue  # TODO: investigate the issue with this year
     end
     @testset "$year End-of-Season Ranking" begin
         season_df = @chain schedule_df begin
@@ -81,7 +81,7 @@ for year in 2002:2024
                 :game_type => x -> x .== "REG",
             )
         end
-        df = clean_data(season_df, team_df)
+        df = clean_data(season_df, team_df)  # TODO: serialize `df` to disk
         rank_df = compute_ranks(df)
 
         @testset "AFC" begin

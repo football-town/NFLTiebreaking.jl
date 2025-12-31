@@ -313,6 +313,7 @@ end
 11. Net TDs in All Games
 """
 function net_tds(teams::AbstractString...; df)
+    # TODO: enhance `df` to include TD totals
     error("cannot compute net TDs from current df")
     rtn = zeros(axes(teams))
     for i in eachindex(teams)
