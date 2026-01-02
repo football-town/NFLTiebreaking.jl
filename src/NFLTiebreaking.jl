@@ -5,6 +5,7 @@ module NFLTiebreaking
 using Chain
 using DataFrames
 using Logging
+using Pkg.Artifacts
 
 """
     winning_percentage(wins, losses, ties)
@@ -689,5 +690,8 @@ function compute_ranks(df::AbstractDataFrame)
 
     return pct_df
 end
+
+datapath(year::Integer) = joinpath(artifact"seasons", "$year.arrow")
+datapath(label::AbstractString) = joinpath(artifact"seasons", "$label.arrow")
 
 end # module NFLTiebreaking

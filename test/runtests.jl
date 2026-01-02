@@ -3,7 +3,7 @@ module TestNFLTiebreaking
 using Arrow
 using Chain
 using DataFrames
-using NFLTiebreaking: clean_data, compute_ranks
+using NFLTiebreaking: clean_data, compute_ranks, datapath
 using Test
 
 
@@ -81,7 +81,7 @@ const NFC_RANKS = Dict(
 
 for year in 2002:2024
     @testset "$year End-of-Season Ranking" begin
-        path = joinpath(@__DIR__, "..", "data", "$year.arrow")
+        path = datapath(year)
         df = DataFrame(Arrow.Table(path))
         rank_df = compute_ranks(df)
 
