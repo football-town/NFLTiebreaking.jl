@@ -2,5 +2,5 @@
 git-tree-sha1 = "b60fc562ac953d9d69d65075950b7d375090d26d"
 
     [[seasons.download]]
-    url = "https://github.com/football-town/NFLTiebreaking.jl/raw/refs/heads/feature/initial-artifact/data/seasons.tar.gz"
+    url = "https://github.com/football-town/NFLTiebreaking.jl/raw/e09c887d57cc6103c321f1e2126a3fe5d351e1ff/data/seasons.tar.gz"
     sha256 = "f0b3cbbd4ef470ddb60c7a03a2851cb29d28558c92bba00a749198662478f67e"
