@@ -2,10 +2,12 @@ module NFLTiebreaking
 
 # Source: https://operations.nfl.com/the-rules/nfl-tie-breaking-procedures/
 
+using Arrow
 using Chain
 using DataFrames
 using Logging
 using Pkg.Artifacts
+using PrecompileTools: @setup_workload, @compile_workload
 
 """
     winning_percentage(wins, losses, ties)
@@ -693,5 +695,20 @@ end
 
 datapath(year::Integer) = joinpath(artifact"seasons", "$year.arrow")
 datapath(label::AbstractString) = joinpath(artifact"seasons", "$label.arrow")
+
+@setup_workload begin
+    season_df = DataFrame(Arrow.Table(datapath("season")))
+    team_df = DataFrame(Arrow.Table(datapath("team")))
+    dataframes = [DataFrame(Arrow.Table(datapath(year))) for year in 2002:2024]
+
+    @compile_workload begin
+        clean_df = clean_data(season_df, team_df)
+
+        for df in dataframes
+            rank_df = compute_ranks(df)
+        end
+
+    end
+end
 
 end # module NFLTiebreaking
