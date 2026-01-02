@@ -12,9 +12,8 @@ schedule_df = load_schedules()
 team_df = load_teams()
 println("Done loading from NFLData")
 
-
 for year in 2002:2024
-    path = joinpath(@__DIR__, "data", "$year.arrow")
+    path = joinpath(@__DIR__, "$year.arrow")
     println("Cleaning regular season data for $year")
     season_df = @chain schedule_df begin
         subset(
@@ -22,7 +21,12 @@ for year in 2002:2024
             :game_type => x -> x .== "REG",
         )
     end
-    df = clean_data(season_df, team_df)  # TODO: serialize `df` to disk
+    if year == 2002
+        println("Writing inputs for `clean_data` to disk")
+        Arrow.write(joinpath(@__DIR__, "season.arrow"), season_df)
+        Arrow.write(joinpath(@__DIR__, "team.arrow"), team_df)
+    end
+    df = clean_data(season_df, team_df)
     println("Writing $year to disk at $path")
     Arrow.write(path, df)
     println("Done with $year")

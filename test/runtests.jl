@@ -81,7 +81,7 @@ const NFC_RANKS = Dict(
 
 for year in 2002:2024
     @testset "$year End-of-Season Ranking" begin
-        path = joinpath(@__DIR__, "data", "$year.arrow")
+        path = joinpath(@__DIR__, "..", "data", "$year.arrow")
         df = DataFrame(Arrow.Table(path))
         rank_df = compute_ranks(df)
 
