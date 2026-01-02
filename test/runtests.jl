@@ -1,8 +1,8 @@
 module TestNFLTiebreaking
 
+using Arrow
 using Chain
 using DataFrames
-using NFLData: load_schedules, load_teams
 using NFLTiebreaking: clean_data, compute_ranks
 using Test
 
@@ -78,18 +78,11 @@ const NFC_RANKS = Dict(
     2024 => ["DET", "PHI", "TB", "LA", "MIN", "WAS", "GB", "SEA", "ATL", "ARI", "DAL", "SF", "CHI", "CAR", "NO", "NYG"],
 )
 
-schedule_df = load_schedules()
-team_df = load_teams()
 
 for year in 2002:2024
     @testset "$year End-of-Season Ranking" begin
-        season_df = @chain schedule_df begin
-            subset(
-                :season => x -> x .== year,
-                :game_type => x -> x .== "REG",
-            )
-        end
-        df = clean_data(season_df, team_df)  # TODO: serialize `df` to disk
+        path = joinpath(@__DIR__, "data", "$year.arrow")
+        df = DataFrame(Arrow.Table(path))
         rank_df = compute_ranks(df)
 
         @testset "AFC" begin
