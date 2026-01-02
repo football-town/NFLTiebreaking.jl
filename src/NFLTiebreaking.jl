@@ -85,6 +85,7 @@ function common(teams::AbstractString...; df::AbstractDataFrame, min_games::Inte
         for t
         in teams
     ])
+    @debug "common opponents" teams common_opponents
     rtn = zeros(axes(teams))
     for i in eachindex(teams)
         team_df = @chain df begin
@@ -502,24 +503,34 @@ function wild_card(teams::AbstractString...; df::DataFrame)
             return within_division(teams...; df)
         end
         tb = h2h(teams...; df)
+        @debug "h2h" tb
         @iftiebroken tb teams df wild_card true
         tb = conference(teams...; df)
+        @debug "conference" tb
         @iftiebroken tb teams df wild_card true
         tb = common(teams...; df, min_games=4)
+        @debug "common" tb
         @iftiebroken tb teams df wild_card true
         tb = victory(teams...; df)
+        @debug "victory" tb
         @iftiebroken tb teams df wild_card true
         tb = schedule(teams...; df)
+        @debug "schedule" tb
         @iftiebroken tb teams df wild_card true
         tb = conf_points_rank(teams...; df)
+        @debug "conf_points_rank" tb
         @iftiebroken tb teams df wild_card false
         tb = all_points_rank(teams...; df)
+        @debug "all_points_rank" tb
         @iftiebroken tb teams df wild_card false
         tb = net_points_conference(teams...; df)
+        @debug "net_points_conference" tb
         @iftiebroken tb teams df wild_card true
         tb = net_points_all(teams...; df)
+        @debug "net_points_all" tb
         @iftiebroken tb teams df wild_card true
         tb = net_tds(teams...; df)
+        @debug "net_tds" tb
         @iftiebroken tb teams df wild_card true
         throw(CoinTossNeededError())  # non-deterministic
     else
